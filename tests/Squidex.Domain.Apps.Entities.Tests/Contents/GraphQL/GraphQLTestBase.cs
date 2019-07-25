@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using FakeItEasy;
+using GraphQL;
+using GraphQL.DataLoader;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -24,6 +26,7 @@ using Squidex.Domain.Apps.Entities.Schemas;
 using Squidex.Infrastructure;
 using Squidex.Infrastructure.Json;
 using Squidex.Infrastructure.Json.Objects;
+using Squidex.Infrastructure.Log;
 using Xunit;
 
 #pragma warning disable SA1311 // Static readonly fields must begin with upper-case letter
@@ -33,7 +36,6 @@ namespace Squidex.Domain.Apps.Entities.Contents.GraphQL
 {
     public class GraphQLTestBase
     {
-        protected readonly Schema schemaDef;
         protected readonly Guid schemaId = Guid.NewGuid();
         protected readonly Guid appId = Guid.NewGuid();
         protected readonly string appName = "my-app";
@@ -41,16 +43,15 @@ namespace Squidex.Domain.Apps.Entities.Contents.GraphQL
         protected readonly IAssetQueryService assetQuery = A.Fake<IAssetQueryService>();
         protected readonly ISchemaEntity schema = A.Fake<ISchemaEntity>();
         protected readonly IJsonSerializer serializer = TestUtils.CreateSerializer(TypeNameHandling.None);
-        protected readonly IMemoryCache cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-        protected readonly IAppProvider appProvider = A.Fake<IAppProvider>();
+        protected readonly IDependencyResolver dependencyResolver;
         protected readonly IAppEntity app = A.Dummy<IAppEntity>();
-        protected readonly QueryContext context;
+        protected readonly Context context;
         protected readonly ClaimsPrincipal user = new ClaimsPrincipal();
         protected readonly IGraphQLService sut;
 
         public GraphQLTestBase()
         {
-            schemaDef =
+            var schemaDef =
                 new Schema("my-schema")
                     .AddJson(1, "my-json", Partitioning.Invariant,
                         new JsonFieldProperties())
@@ -87,19 +88,15 @@ namespace Squidex.Domain.Apps.Entities.Contents.GraphQL
             A.CallTo(() => app.Name).Returns(appName);
             A.CallTo(() => app.LanguagesConfig).Returns(LanguagesConfig.Build(Language.DE, Language.GermanGermany));
 
-            context = QueryContext.Create(app, user);
+            context = new Context(user, app);
 
             A.CallTo(() => schema.Id).Returns(schemaId);
             A.CallTo(() => schema.SchemaDef).Returns(schemaDef);
 
-            var allSchemas = new List<ISchemaEntity> { schema };
-
-            A.CallTo(() => appProvider.GetSchemasAsync(appId)).Returns(allSchemas);
-
-            sut = new CachingGraphQLService(cache, appProvider, assetQuery, contentQuery, new FakeUrlGenerator());
+            sut = CreateSut();
         }
 
-        protected static IContentEntity CreateContent(Guid id, Guid refId, Guid assetId, NamedContentData data = null, NamedContentData dataDraft = null)
+        protected static IEnrichedContentEntity CreateContent(Guid id, Guid refId, Guid assetId, NamedContentData data = null, NamedContentData dataDraft = null)
         {
             var now = SystemClock.Instance.GetCurrentInstant();
 
@@ -159,17 +156,19 @@ namespace Squidex.Domain.Apps.Entities.Contents.GraphQL
                 LastModified = now,
                 LastModifiedBy = new RefToken(RefTokenType.Subject, "user2"),
                 Data = data,
-                DataDraft = dataDraft
+                DataDraft = dataDraft,
+                Status = Status.Draft,
+                StatusColor = "red"
             };
 
             return content;
         }
 
-        protected static IAssetEntity CreateAsset(Guid id)
+        protected static IEnrichedAssetEntity CreateAsset(Guid id)
         {
             var now = SystemClock.Instance.GetCurrentInstant();
 
-            var asset = new FakeAssetEntity
+            var asset = new AssetEntity
             {
                 Id = id,
                 Version = 1,
@@ -186,7 +185,7 @@ namespace Squidex.Domain.Apps.Entities.Contents.GraphQL
                 IsImage = true,
                 PixelWidth = 800,
                 PixelHeight = 600,
-                Tags = new[] { "tag1", "tag2" }.ToHashSet()
+                TagNames = new[] { "tag1", "tag2" }.ToHashSet()
             };
 
             return asset;
@@ -208,6 +207,33 @@ namespace Squidex.Domain.Apps.Entities.Contents.GraphQL
         private string Serialize((bool HasErrors, object Response) result)
         {
             return serializer.Serialize(result);
+        }
+
+        private CachingGraphQLService CreateSut()
+        {
+            var appProvider = A.Fake<IAppProvider>();
+
+            A.CallTo(() => appProvider.GetSchemasAsync(appId))
+                .Returns(new List<ISchemaEntity> { schema });
+
+            var dataLoaderContext = new DataLoaderContextAccessor();
+
+            var services = new Dictionary<Type, object>
+            {
+                [typeof(IAppProvider)] = appProvider,
+                [typeof(IAssetQueryService)] = assetQuery,
+                [typeof(IContentQueryService)] = contentQuery,
+                [typeof(IDataLoaderContextAccessor)] = dataLoaderContext,
+                [typeof(IGraphQLUrlGenerator)] = new FakeUrlGenerator(),
+                [typeof(ISemanticLog)] = A.Fake<ISemanticLog>(),
+                [typeof(DataLoaderDocumentListener)] = new DataLoaderDocumentListener(dataLoaderContext)
+            };
+
+            var resolver = new FuncDependencyResolver(t => services[t]);
+
+            var cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+
+            return new CachingGraphQLService(cache, resolver);
         }
     }
 }

@@ -1,12 +1,71 @@
 # Changelog
 
+## 3.0.0 - 2019-07-11
+
+This version contains many major breaking changes. Please read: https://docs.squidex.io/next/02-api-compatibility
+
+### Features
+
+* **Content**: Worklflow system
+* **API**: Hateoas
+* **API**: Info endpoint
+* **Configuration**: A lot of configuration settings to tweak some aspects of the UI.
+
+## v3.0.0-beta2 - 2019-06-29
+
+### Features
+
+* **Content**: Editor for custom workflows.
+
+## v2.2.0 - 2019-06-29
+
+### Features
+
+* **Login**: Redirect to authentication provider automatically if only one provider is active.
+
+### Bugfixes
+
+* **GraphQL**: Fix a bug in styles that prevented to autocomplete to show properly
+
+## v3.0.0-beta1 - 2019-06-24
+
+This version contains many major breaking changes. Please read: https://docs.squidex.io/next/02-api-compatibility
+
+## v2.1.0 - 2019-06-22
+
+### Features
+
+* **Assets**: Parameter to prevent download in Browser.
+* **Assets**: FTP asset store.
+* **GraphQL**: Logging for field resolvers
+* **GraphQL**: Performance optimizations for asset fields and references with DataLoader.
+* **MongoDB**: Performance optimizations.
+* **MongoDB**: Support for AWS DocumentDB.
+* **Schemas**: Separator field.
+* **Schemas**: Setting to prevent duplicate references.
+* **UI**: Improved styling of DateTime editor.
+* **UI**: Custom Editors: Provide all values.
+* **UI**: Custom Editors: Provide context with user information and auth token.
+* **UI**: Filter by status.
+* **UI**: Dropdown field for references.
+* **Users**: Email notifications when contributors is added.
+
+### Bugfixes
+
+* **Contents**: Fix for scheduled publishing.
+* **GraphQL**: Fix query parameters for assets.
+* **GraphQL**: Fix for duplicate field names in GraphQL.
+* **GraphQL**: Fix for invalid field names.
+* **Plans**: Fix when plans reset and extra events.
+* **UI**: Unify slugify in Frontend and Backend.
+
 ## v2.0.5 - 2019-04-21
 
-## Features
+### Features
 
 * **UI**: Sort content by clicking on the table header.
 
-## Bugfixes
+### Bugfixes
 
 * **UI**: Fix publish button in content context menu.
 

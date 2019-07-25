@@ -28,6 +28,7 @@
     @include fixed($size-navbar-height, 0, 0, $size-sidebar-width);
     overflow-x: auto;
     overflow-y: hidden;
+    @include scrollbars(10px, $color-dark2-placeholder);
 }
 
 //
@@ -94,6 +95,10 @@
         &-blank {
             background: $panel-light-background;
             border: 0;
+        }
+
+        &-blank-bordered {
+            border-top: 1px solid $color-border;
         }
 
         // Scrolling must be enabled optionally to prevent bugs.

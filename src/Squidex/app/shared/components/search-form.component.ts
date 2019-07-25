@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 
 import {
     DialogModel,
+    fadeAnimation,
     FilterState,
     ModalModel,
     Queries,
@@ -21,6 +22,9 @@ import {
     selector: 'sqx-search-form',
     styleUrls: ['./search-form.component.scss'],
     templateUrl: './search-form.component.html',
+    animations: [
+        fadeAnimation
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchFormComponent implements OnInit {
@@ -38,15 +42,6 @@ export class SearchFormComponent implements OnInit {
 
     @Input()
     public filter: FilterState;
-
-    @Input()
-    public statuses: { [status: string]: string };
-
-    @Input()
-    public status: string;
-
-    @Output()
-    public statusChange = new EventEmitter<string>();
 
     @Input()
     public schemaName = '';
