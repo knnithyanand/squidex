@@ -1,63 +1,74 @@
 #
-# Stage 1, Prebuild
+# Stage 1, Build Backend
 #
-FROM squidex/dotnet:2.2-sdk-chromium-phantomjs-node as builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0 as backend
 
-ARG SQUIDEX__VERSION=1.0.0
+ARG SQUIDEX__VERSION=4.0.0
+
+WORKDIR /src
+
+# Copy nuget project files.
+COPY backend/*.sln ./
+
+# Copy the main source project files
+COPY backend/src/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+
+# Copy the test project files
+COPY backend/tests/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
+
+# Copy the extension project files
+COPY backend/extensions/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p extensions/${file%.*}/ && mv $file extensions/${file%.*}/; done
+
+RUN dotnet restore
+
+COPY backend .
+ 
+# Test Backend
+RUN dotnet test --no-restore --filter Category!=Dependencies
+
+# Publish
+RUN dotnet publish --no-restore src/Squidex/Squidex.csproj --output /build/ --configuration Release -p:version=$SQUIDEX__VERSION
+
+
+#
+# Stage 2, Build Frontend
+#
+FROM buildkite/puppeteer:latest as frontend
 
 WORKDIR /src
 
 # Copy Node project files.
-COPY src/Squidex/package*.json /tmp/
+COPY frontend/package*.json /tmp/
 
 # Install Node packages 
 RUN cd /tmp && npm install --loglevel=error
 
-# Copy nuget project files.
-COPY /**/**/*.csproj /tmp/
-# Copy nuget.config for package sources.
-COPY NuGet.Config /tmp/
-
-# Install nuget packages
-RUN bash -c 'pushd /tmp; for p in *.csproj; do dotnet restore $p --verbosity quiet; true; done; popd'
-
-COPY . .
+COPY frontend .
 
 # Build Frontend
-RUN cp -a /tmp/node_modules src/Squidex/ \
- && cd src/Squidex \
+RUN cp -a /tmp/node_modules . \
  && npm run test:coverage \
  && npm run build
- 
-# Test Backend
-RUN dotnet test tests/Squidex.Infrastructure.Tests/Squidex.Infrastructure.Tests.csproj --filter Category!=Dependencies \ 
- && dotnet test tests/Squidex.Domain.Apps.Core.Tests/Squidex.Domain.Apps.Core.Tests.csproj \ 
- && dotnet test tests/Squidex.Domain.Apps.Entities.Tests/Squidex.Domain.Apps.Entities.Tests.csproj \
- && dotnet test tests/Squidex.Domain.Users.Tests/Squidex.Domain.Users.Tests.csproj \
- && dotnet test tests/Squidex.Web.Tests/Squidex.Web.Tests.csproj
 
-# Publish
-RUN dotnet publish src/Squidex/Squidex.csproj --output /out/alpine --configuration Release -r alpine.3.7-x64 -p:version=$SQUIDEX__VERSION
+RUN cp -a build /build/
+
 
 #
-# Stage 2, Build runtime
+# Stage 3, Build runtime
 #
-FROM microsoft/dotnet:2.2-runtime-deps-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:5.0.0-buster-slim
 
 # Default AspNetCore directory
 WORKDIR /app
 
-# add libuv & curl
-RUN apk update \
- && apk add --no-cache libc6-compat \
- && apk add --no-cache libuv \
- && apk add --no-cache curl \
- && ln -s /usr/lib/libuv.so.1 /usr/lib/libuv.so
-
-# Copy from build stage
-COPY --from=builder /out/alpine .
+# Copy from build stages
+COPY --from=backend /build/ .
+COPY --from=frontend /build/ wwwroot/build/
 
 EXPOSE 80
 EXPOSE 11111
 
-ENTRYPOINT ["./Squidex"]
+ENTRYPOINT ["dotnet", "Squidex.dll"]

@@ -1,0 +1,18 @@
+<div class="clearfix" *ngIf="pager && (!autoHide || pager.canGoPrev || pager.canGoNext)">
+    <div class="float-right pagination">
+        <select class="custom-select custom-select-sm" [ngModel]="pager.pageSize" (ngModelChange)="setPageSize($event)">
+            <option *ngFor="let pageSize of pageSizes" [ngValue]="pageSize">{{pageSize}}</option>
+        </select>
+
+        <span class="page-info">
+            <span *ngIf="pager.numberOfItems > 0" class="pagination-text">{{ 'common.pagerInfo' | sqxTranslate: pager }}</span>
+    
+            <button type="button" class="btn btn-text-secondary pagination-button" [disabled]="!pager.canGoPrev" (click)="goPrev()">
+                <i class="icon-angle-left"></i>
+            </button>
+            <button type="button" class="btn btn-text-secondary pagination-button" [disabled]="!pager.canGoNext" (click)="goNext()">
+                <i class="icon-angle-right"></i>
+            </button>
+        </span>
+    </div>
+</div>

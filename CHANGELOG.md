@@ -1,12 +1,563 @@
 # Changelog
 
+## 5.3.0 - 2020-10-30
+
+### Breaking changes
+
+This changes reverts the changes from `5.1.0` and uses a normal handling of forwarded headers again.
+
+Futhermore it fixes some issues with the migration from 4.X versions. You have to run the migrations agains as explained here: https://docs.squidex.io/01-getting-started/installation/troubleshooting-and-support#my-migration-is-broken
+
+### Features
+
+* **Assets**: Upload assets by dropping a folder to the drop area.
+* **Assets**: Introduce a new option to fix broken asset files.
+* **Backups**: Ignore missing asset files during backup and restore.
+* **GraphQL**: Limit the number of parallel requests in GraphQL to keep the load on MongoDB low.
+* **GraphQL**: Resolve reverse references in GraphQL.
+* **Rules**: Log exceptions in rule handlers (actions).
+* **UI**: Provide access to the current language in field editors.
+
+### Bugfixes
+
+* **Assets**: Fix parent id for folders. See above.
+* **UI**: Several layout fixes in the UI.
+* **UI**: Several UI language fixes.
+
+## 4.7.6 - 2020-10-30
+
+### Features
+
+* **Assets**: Upload assets by dropping a folder to the drop area.
+* **GraphQL**: Limit the number of parallel requests in GraphQL to keep the load on MongoDB low.
+* **GraphQL**: Resolve reverse references in GraphQL.
+* **Rules**: Log exceptions in rule handlers (actions).
+* **UI**: Provide access to the current language in field editors.
+
+### Bugfixes
+
+* **UI**: Several layout fixes in the UI.
+* **UI**: Several UI language fixes.
+
+## 5.1.0 - 2020-10-20
+
+### Breaking Changes
+
+This version introduces a few small breaking changes. The support for https redirects and `X-FORWARDED-*` headers has been removed. Squidex does not provide a solution for https and it is the responsibility of the reverse proxy like nginx, caddy, IIS or Cloudflare to terminate https requests. Therefore it does not make sense to care about https redirects anyway. The support for `X-FORWARDED-*` headers has been removed because it was possible to solve it with the mandatory `urls:baseUrls` setting in an easier way.
+
+This version also comes with new docker image versioning, each version is now tagged with the concrete version and the major version only, e.g.
+
+* squidex/squidex:5
+* squidex/squidex:5.1
+
+Furthermore the docker-compose files are updated with a simpler approach to use [caddy](https://caddyserver.com/) as a reverse proxy for https termination:
+
+https://github.com/Squidex/squidex-docker/blob/master/standalone/docker-compose.yml
+
+
+### Features
+
+* **Backup**: Check version compatibility.
+* **Backup**: Adjust asset urls in strings to new app.
+* **Full Text**: Batching operations for Elastic Search
+* **Full Text**: Search in field with Elastic Search
+* **Full Text**: Search lazy with Elastic Search
+* **UI**: Leave an app.
+* **UI**: Fullscreen mode for custom field editors.
+* **UI**: Language toggle to switch UI language.
+* **UI**: Half width fields for field editors.
+* **UI**: Make the schema selector dropdown more visible.
+* **UI**: Markdown support for field labels.
+* **Server**: Remove support for https redirects and X-FORWARDED headers.
+
+### Bugfixes
+
+* **UI**: Fixed the route synchronizer.
+* **UI**: Fix a few spelling errors.
+* **UI**: Fixes checkboxes for custom roles.
+* **Assets**: Fix asset urls in GraphQL.
+
+## 5.0.0 - 2020-10-08
+
+This feature adds custom IDs to the system. So far every ID like a content ID is globally unique. This means that you cannot create custom IDs and when a backup is restored you need to assign new ids, because the old IDs might be already in use.
+
+With this version on, every ID is prefixed with the app id, meaning they are only unique within an app. This allows new endpoints for upserting contents and defininig custom ids for assets.
+
+### WARNING: MIGRATION
+
+This version has to migrate a few mongo collections:
+
+* Events
+* States_AssetFolders
+* States_Assets
+* State_Contents_All
+* State_Contents_Published
+
+This process will start automatically and can take a while. To be backwards compatible when you experience a bug, new collections are created. The new collection names are
+
+* Events2
+* States_AssetFolders2
+* States_Assets2
+* States_Contents_All2
+* States_Contents_Published2
+
+(As you can see the collection names have been streamlined.)
+
+If everything works fine for you, you can delete the old collections.
+
+## 4.7.0 - 2020-09-29
+
+### Features
+
+* **Assets**: Do not cache protected assets when user gets a 403.
+* **Assets**: Reduce the number of threads that resize images to improve performance.
+* **Assets**: New query string properties to change the format of assets, e.g. from PNG to JPG.
+* **Content**: New full text index based on MongoDB.
+* **Contents**: Better exception handling in validation.
+* **Events**: New event consumers with support for batching. Can process up to 10.000 events / second.
+* **Events**: Count the number of processed events to get an understanding of performance.
+* **GraphQL**: GraphQL Mutations.
+* **General**: Better default configuration.
+* **Roles**: Role properties to customize the UI.
+* **Rules**: New functions for rules.
+* **Rules**: Enable algolia and ElasticSearch rule actions for all events.
+* **UI**: Sidebar plugin for contents and content items.
+* **UI**: Disable add button for array field when max items is reached.
+* **UI**: Italian translation.
+* **UI**: Dutch translation.
+
+### Bugixes
+
+* **Backup**: Fix memory usage when downloading backups.
+* **Clients**: Fix anonymous access clients.
+* **Contents**: Fixes to the angular forms to revert a performance improvements.
+* **Contents**: Fixes to empty filter.
+* **UI**: Fix confirm button.
+
+## 5.0.0 BETA 2 - 2020-09-02
+
+Includes new features in 4.6.0
+
+## 4.6.0 - 2020-09-02
+
+### Features
+
+* **API**: Client contigent or API calls to protected your API.
+* **API**: Special headers to simulate errors in the UI.
+* **API**: Allow anonymous access per client.
+* **Assets**: Better fallback handling when resizing assets failed.
+* **Assets**: Autorotate images with orientation metadata.
+* **Contents**: Better word count implementation which also works for CJK languages. (Chinese, Japanese, Korean).
+* **Contents**: Text based validation for string fields. You can define the content type now and the validator will extract the plain text from html and markdown to make character or word count validation.
+* **Contents**: Filter content by `newStatus` field.
+* **Contents / Schemas**: Field rules to disable or hide fields based on conditions.
+* **Workflows**: Visualization of the workflow with a readonly diagram.
+* **UI**: Button per field to unset a field value.
+* **UI**: Custom editors for all field types.
+* **UI**: Confirm dialog when removing assets or references.
+* **UI**: Open referenced content in new tab.
+* **UI**: Show current traffic usage in Dashboard.
+* **UI**: Toggle between locale and UTC mode for datetime editors.
+* **UI / General**: Support for localized UI and backend with support for `en` and `nl` for now. Italian is coming as well.
+* **Performance**: Replicated cache for some high load scenarios.
+
+
+### Bugfixes
+
+* **Contributors**: Ignore casing of email addresses, which was causing Squidex not to invite people with uppercase characters in email addresses.
+* **Contents**: Improved content scheduler to handle contents better, when the app or schema has already been deleted.
+* **Contents**: Fixes for authentication and GraphQl GET Endpoint.
+* **Contents**: Improve javascript error handling for schemas scripts. Some exceptions have been swallowed before.
+* **EventSourcing**: Fixed a bug for the event consumer, which was skipping some events in high load scenarios. Need a replica set and Mongo 4.2. to work properly.
+* **Algolia**: Fixed Algolia rule action.
+
+## 5.0.0 BETA 1 - 2020-07-06
+
+This version introduces a new way to deal with ids. So far each content element has an id that is unique across all apps. This causes problems, because you cannot define your own ids and the ids have to change when you clone an app via backup and restore.
+
+With this version ids for content items and assets are only unique within an app.
+
+To make this possible, this version rebuilds all content items, assets and asset folders which can take a few minutes.
+
+## 4.5.0 - 2020-07-06
+
+### Features
+
+* **Backups**: Increase download timeout for backups to 60 minutes.
+* **Rules**: Change expiration for rule events to be relative from now instead of relative to the original event to make replaying easier.
+* **Rules**: Also create rule events when the creation failed to simplify debugging.
+* **UI**: CTRL+Click for content items to open them in new tabs. Mimic default browser behavior for links.
+* **UI**: Make sections defined by schema separators collapsible.
+* **UI**: Customizable dashboard.
+* **UI**: Include external dependencies into the build to run Squidex in protected company networks.
+* **UI**: Define the preview modes for assets.
+* **Notifo**: Notifo integration finalized.
+
+### Bugfixes
+
+* **Assets**: Fixed a bug where the wrong permission was checked for protected assets.
+* **Assets**: Fixed the wrong calculation of focus points when resizing assets.
+* **Assets**: Upraded the image library to a newer version to fix a bug with resizing.
+* **Contents**: Minor fixes for flat content.
+* **Rules**: Fixed several bugs in the rule runner.
+* **Rules**: Fixed avro serialize for union schemas.
+* **Rules**: Proper cancellation for kafka.
+* **Schemas**: Fixed several minor bugs in the schema synchronizer.
+
+## 4.4.0 - 2020-06-15
+
+### Features
+
+* **Rules**: Liquid support.
+
+### Bugfixes
+
+* **Grains**: Fix restart of grains
+* **EventStore**: Fix a bug where very old events were not consumed properly.
+
+## 4.4.0 RC - 2020-05-30
+
+### General
+
+* Many improvements to tests and integration of API tests into CI pipeline.
+
+### Features 
+
+* **Rules**: Defined payload, headers and key in kafka rule action.
+* **Rules**: Support for avro serialization in kafka rule action.
+* **Rules**: Define fallback values in formatting, e.g. `${CONTENT_DATA.name.iv ? Fallback}`
+* **Rules**: Define transformations, e.g. `${CONTENT_DATA.name.iv | upper}`: Upper, Lower, Slugify, EncodeJson, Timestamp_Ms, Timestamp_Seconds
+* **Rules**: Resolve reference in formatting, e.g. `${CONTENT_DATA.city.iv.data.name.iv}`
+* **Contents**: Use aggregation framework to order large data sets.
+* **Contents**: Improvements to the bulk endpoint to also allow deletion and updates.
+* **Contents**: Improvements to the enrichment flow of contents when they are queried from the database.
+* **Scripts**: Fallback for `oldStatus`.
+* **Clustering**: Auto restart background processes.
+* **Authentication**: Use local API authentication to bypass the extra call to identity server and to make deployment easier.
+* **Authentication**: Improve performance when checking permissions by simple caching.
+* **Amazon S3**: Allow to upload assets where the stream has no length.
+* **UI**: Additional editor to use checkboxes for references.
+
+### Bugfixes
+
+* **Assets**: Fixed a bug where deleting folders using the UI was not working properly.
+* **Contents**: Use aggregation framework to order large data sets.
+* **Contents**: Fixed a bug where references were cleared in some conditions.
+* **UI**: Do not show first value in dropdowns when no value is defined.
+* **UI**: Fixes for notifications and show newest notifications first.
+* **UI**: Fixed the layout of asset preview in content list.
+* **Authentication**: Fixed a bug where invited collaborators were not added to an app correctly.
+* **Schemas**: Fix for schema synchronizer were some changes were not discovered correctly.
+
+## 4.3.0 - 2020-04-27
+
+### Features
+
+* **API**: Dedicated health check for event consumers and background processes.
+* **Rules**: Integrated a background worker to start rules from beginning.
+* **Users**: Custom user properties.
+* **Scripting**: Incrementing counters.
+
+### Bugfixes
+
+* **API**: Fix in OpenAPI schema to get rid of FieldNames collection that causes problems in code generators.
+* **API**: Short header for surrogate keys and custom request header to turn off keys.
+* **API**: Better error handling for unsupported ODATA features.
+* **UI**: Fix in autocompletion component which was causing issues in role form.
+* **UI**: Fixed a layout bug in the role form.
+* **UI**: Fixed a layout bug in tag editor.
+* **UI**: Time formatting fixed.
+* **UI**: Fixed a bug that was showing all assets and not in their folders.
+* **API**: Fixed index usage for event store.
+* **FullText**: Fixed a small minor in full text index.
+* **Rules**: Fixed a bug in email rule which was using email body as sender and recipient address.
+* **Rules**: Use default timeout in webhook.
+
+## 4.2.0 Beta 2 - 2020-02-24
+
+This release just contains a lot of bugfixes.
+
+## 4.2.0 Beta 1 - 2020-02-20
+
+The release makes a lot of changed to the content structure, therefore it will run a migration to recreate the contents collections. This can take a while.
+
+### Features
+
+* **UI**: Global search
+* **Contents**: Full text search also includes references items.
+* **Contents**: Alignment of workflows.
+* **Contents**: Improvements to full text index for later support of elastic search.
+
+## 4.1.3 - 2020-02-20
+
+### Bugfixes
+
+* **UI**: Several fixes due to wrong references of SCSS mixins.
+
+### Features
+
+* **Assets**: Option to turn on the recursive deleter.
+
+## 4.1.2 - 2020-02-19
+
+### Bugfixes
+
+* **UI**: Fix to show all controls for localized assets.
+* **UI**: Fix for sorting content when clicking on table headers.
+* **UI**: Fixed disable state in tag editor.
+* **UI**: Fixed layout issues with modal editor.
+
+### Features
+
+* **Clustering**: Configuration option to define the IP Address manually.
+* **UI**: Migration to Angular9 and Ivy.
+
+## 4.1.0 - 2020-02-11
+
+### Bugfixes
+
+* **Assets**: Resizing of images when only or height is defined.
+* **Contents**: Fixes with nullable property in OpenApi.
+* **UI**: Fixes with valueChanges in editors.
+
+## 4.1.0 RC - 2020-02-05
+
+### Features
+
+* **Assets**: Support for focus points in UI and API.
+* **Assets**: Integrated editor / cropper for basic image editing.
+* **Contents**: Better and more consistent content cleanup and enrichment.
+
+### Bugfixes
+
+* **API**: Faster equals checks.
+* **API**: Fixed a critical bug that caused an infinite loop and Out of Memory.
+* **API**: Many small bugfixes.
+
+## 4.1.0 Beta 1 - 2020-01-17
+
+### Features
+
+* **Assets**: Folders to organized your assets.
+* **Assets**: Asset metadata with built in editor in the management UI.
+* **Assets**: Better detection of asset type, including videos and extracting of more metadata.
+* **Assets**: Protect assets.
+* **Assets**: Amazon S3 support for assets.
+* **Assets**: Dedicated permission to upload new version of asset.
+* **GraphQL**: Flat data to provide content with default language rules.
+* **Logging**: Increased log levels and performance improvements.
+* **Logging**: Store request logs in MongoDB for fast download (also in hosted version).
+* **Geolocation**: Search by location in OpenStreetMap-Editor.
+* **Geolocation**: General UX approvements for Editor.
+* **Comments**: Mention other contributors by email address.
+* **Comments**: Notification when you get mentioned.
+* **Comments**: Markdown support.
+* **Comments**: Rule action to create comments for content items.
+* **Comments**: Trigger to handle notifications, for example to forward them to slack.
+* **References**: Tag editor for references.
+* **References**: Added button to open contents view in a new browser tab.
+* **UI**: Page size for contents view.
+* **UI**: Less forgiving markdown preview.
+* **UI**: Video support for rich text editor.
+* **UI**: Clearer link to API documentation.
+* **Strings**: StockImage editor with photes provided by Unsplash.
+* **Performance**: Performance improvements and reduced memory allocations.
+* **Performance**: Faster full text index.
+
+### Bugfixes
+
+* **Backups**: Fixed several minor bugs in backups and increased the test coverage.
+* **Infrastructure**: Fixed a bug when resetting plans (Cloud only).
+* **Infrastructure**: Fixed header handling when Squidex is hosted behind a proxy.
+* **Content**: Use proper MongoDB indices for default sorting.
+* **UI**: Fixed image positioning in Safari in content list.
+* **UI**: Fix for autosaving content.
+* **Translation**: Fix for deepl translation.
+* **Authentication**: Better logout.
+
+## 4.0.3 - 2019-11-18
+
+### Features
+
+* **Login**: Support for Microsoft TenantId. Thanks to [mhilgersom](https://github.com/mhilgersom)
+
+## 4.0.2 - 2019-11-18
+
+### Bugfixes
+
+* **API**: Fix parsing of OData queries with required fields.
+* **API**: Also add client to contributor index.
+* **API**: Fix Asset upload size limit.
+* **API**: Fixed required attribute for generated OpenAPI schema.
+* **UI**: Add scripts to schema export so that it does not get overwritten on sync.
+* **UI**: Field readonly fields in content lists.
+
+## 4.0.1 - 2019-11-14
+
+### Bugfixes
+
+* **UI**: Cancel button for new apps should not be disabled after submit.
+* **Schema**: Fixed synchronization for list fields and reference fields.
+
+## 4.0.0 - 2019-11-13
+
+### Breaking Changes
+
+#### List Fields
+
+This feature contains a major update how reference fields and list fields are managed. In previous versions, schema fields had the properties `IsListField` or `IsReferenceField` to indicate whether a field should be shown in content lists or not. This was hard to manage in the UI and you could not specify the order. With this release schemas contain list of field names that should be used as list fields or reference fields. List field names can also contain meta fields like the content id or the content author. But we have decided not to implement a migration for that. If you use the feature you have to configure these fields again. Please not that the API is not affected and it is very likely not a breaking change for your consuming applications.
+
+#### .NET Core 3.0
+
+Migration to .NET Core 3.0. This also includes some code changes such as cleanup of configuration and proper nullable support.
+
+This version does not use alpine image with self contained image any more. Therefore the final image is larger than before but the Squidex layer itself is smaller, which means a reduced disk size and download size when you update Squidex or when you have multiple versions installed or other .NET Core applications on your servers.
+
+#### Clustering
+
+This version introduces a new storage to communicate cluster members. Therefore it is recommended not to use a rolling deployment and restart the entire cluster instead.
+
+### Features
+
+* **UI**: New approach to manage list fields and schema fields.
+* **UI**: Many small UI / UX improvements.
+* **UI**: Improvements to the Geolocation editor.
+* **UI**: Improved dialog to connect a client.
+* **UI**: Improved Rule Wizard dialog.
+* **UI**: Integrated cluster monitoring UI.
+* **UI**: Improved schema UI.
+* **UI**: Confirm dialog before removing contributor.
+* **Workflows**: Restrict when a content item can be updated by setting an expression or roles.
+* **Workflows**: Define multiple roles for workflows.
+* **Rules**: Action to write comments.
+* **API**: Migration to .NET Core 3.0
+* **API**: Configuratiopn option to recreated the superadmin whe nyou loose the password.
+* **GraphQL**: Flat content structure.
+* **Clustering**: Clustering improvements.
+
+### Bugfixes
+
+* **UI**: Fixed the buttons to change the status of multiple contents.
+* **Rules**: Fixed saving of rule names.
+
+## 4.0.0 Beta 1 - 2019-10-27
+
+Migration to .NET Core 3.0. This also includes some code changes such as cleanup of configuration and proper nullable support.
+
+This version does not use alpine image with self contained image any more. Therefore the final image is larger than before but the Squidex layer itself is smaller, which means a reduced disk size and download size when you update Squidex or when you have multiple versions installed or other .NET Core applications on your servers.
+
+## 3.5.0 - 2019-10-26
+
+**NOTE**: This is the latest release with .NET Core 2.X. Next release will be 3.0 and above. Does not really matter when you use Docker.
+
+### Features
+
+* **Grain**: Fixed grain indices.
+* **Content**: Multiple schemas allowed for references.
+* **UI**: Inline stars editor.
+* **UI**: Get rid of immutable arrays.
+* **UI**: Hide date buttons based on settings.
+* **UI**: Updated several packages.
+* **UI**: Improvement to contributor page.
+* **UI**: Better error indicating when saving content.
+* **UI**: Warning when changing content status and you have pending changes.
+* **UI**: Markdown support for Alerts and Dialogs.
+* **UI**: Design improvements.
+* **UI**: Custom "Forbidden" page when users access a page he is not allowed to instead of automatic logout.
+* **UI**: Migration to angular CDK drag and drop to replace two drag and drop libraries.
+* **UI**: Collapse or expand all array items.
+* **Migration**: Better cancellation support for migration.
+* **Rules**: Custom payload for Webhook and Algolia action.
+* **Rules**: Optional names for rules when you have multiple rules with the same actions and triggers.
+* **Rules**: Basic statistic summary per rule.
+* **Rules**: Filter rule events by rule.
+* **Rules**: Added exception details for Algolia.
+* **Common**: New diacritic character for slug 
+
+### Bugfixes
+
+* **UI**: Fix references dropdown in query UI for localized values.
+* **UI**: Fixed the unique checkbox in schema editor.
+* **UI**: Fixed default date handling.
+* **UI**: Fixed sorting of fields in schema synchronization endpoint.
+* **UI**: Fixed preview button when multiple preview targets where configured.
+* **UI**: Fixed TinymCE editor in arrays (Not recommended to use that!)
+* **App**: Fix plan settings.
+* **App**: Do not store default roles in the database so that we can change them later when new features are added.
+* **Logging**: Use explicit thread for logging to console.
+* **Logging**: Critical performance improvement.
+* **Rules**: Fixed discourse action.
+
+## 3.3.0 - 2019-09-08
+
+### Features
+
+* **UI**: Autosaving for content in local store.
+* **UI**: Labels, descriptions and icons for contents.
+* **UI**: Bulk import for contributors.
+* **UI**: Pagination and search for contributors.
+* **UI**: Improve file size for generated javascript bundles.
+* **Rules**: Configurable default timeout for rule execution.
+* **Assets**: Use asset url with slug when adding assets to rich text or markdown.
+* **API**: Client per user.
+* **API**: Limits for number of living content grains.
+
+### Bugfixes
+
+* **UI**: Fix for dynamic chunk loading.
+* **UI**: Styling fixes for date editor.
+* **UI**: Improvement and fixes for checking unsaving changes.
+* **API**: Fixes hateaos links for nested schema fields.
+
+## 3.2.2 - 2019-08-20
+
+### Bugfixes
+
+* **API**: Fixed a bug that prevented json response for field endpoint to be serialized correctly.
+* **UI**: Layout fix for clients page.
+
+## 3.2.1 - 2019-08-19
+
+### Bugfixes
+
+* **MongoDB**: Fix index creation for Orleans tables.
+* **MongoDB**: Fixes in OpenAPI definition.
+
+## 3.2.0 - 2019-08-19
+
+### Features
+
+* **Contents**: Improved reference dropdown selector.
+* **API**: Json queries for new query editor.
+* **API**: Moved from Swagger2 to OpenAPI for generated documentation.
+* **API**: Improved GraphQL error handling.
+* **API**: Setting to show PII (Personally Identifiable Information) in logs.
+* **UI**: Query editor for json queries.
+* **UI**: Horizontal scrolling in UI.
+* **Assets**: Pass in time to cache to asset API.
+* **Assets**: Shorter asset fields and asset migration.
+* **Rules**: Kafka rule action, thanks to https://github.com/sauravvijay
+* **MongoDB**: Removed support for CosmosDB and DocumentDB due to high costs.
+
+## 3.1.0 - 2019-07-25
+
+### Features
+
+* **Contents**: Include reference fields to indicate which fields to show when a content item is referenced by another content.
+* **Contents**: Resolve references for content list when max items is set to 1.
+* **UI**: Scrollbars improved and designed.
+
+### Bugfixes
+
+* **UI**: Multiple fixes for modal dialogs.
+
 ## 3.0.0 - 2019-07-11
 
 This version contains many major breaking changes. Please read: https://docs.squidex.io/next/02-api-compatibility
 
 ### Features
 
-* **Content**: Worklflow system
+* **Contents**: Workflow system
 * **API**: Hateoas
 * **API**: Info endpoint
 * **Configuration**: A lot of configuration settings to tweak some aspects of the UI.
@@ -15,7 +566,7 @@ This version contains many major breaking changes. Please read: https://docs.squ
 
 ### Features
 
-* **Content**: Editor for custom workflows.
+* **Contents**: Editor for custom workflows.
 
 ## v2.2.0 - 2019-06-29
 
@@ -117,7 +668,7 @@ You can use the following syntax for array items:
 ### Features
 
 * **UI**: Automatic generation of UI for rule actions.
-* **Content**: Improved full text engine with `Lucene.NET`.
+* **Contents**: Improved full text engine with `Lucene.NET`.
 * **Server**: Plugin system.
 * **Server**: Performance improvement for event handling.
 
@@ -189,8 +740,8 @@ The full text index is populated in the background and it can therefore take a f
 * **Users**: Invite users to an app even if they do not have an account yet.
 * **Users**: Github authentication.
 * **Client Library**: Integrated autogenerated management library.
-* **Content**: Preview urls for schemas.
-* **Content**: Button  to show all input fields for localized fields.
+* **Contents**: Preview urls for schemas.
+* **Contents**: Button  to show all input fields for localized fields.
 * **Scripting**: Access to user roles.
 
 ### Bugfixes
@@ -299,7 +850,7 @@ Various small bugfixes for UI and API.
 ### Bugfixes
 
 * **UI**: Nested fields got wrong ids and names and could not be saved.
-* **Content**: Ensure that the content api returns content in correct order when querying by ids.
+* **Contents**: Ensure that the content api returns content in correct order when querying by ids.
 
 ## v1.7.0 - 2018-06-25
 
@@ -339,7 +890,7 @@ Various small bugfixes for UI and API.
 
 ### Features
 
-* **Content**: Allow to save content updates as draft.
+* **Contents**: Allow to save content updates as draft.
 * **Schemas**: Create folders to group schemas.
 * **UI**: Increased the search input.
 * **UI**: Plugin system for content editors.
@@ -376,7 +927,7 @@ Various small bugfixes for UI and API.
 ### Features
 
 * **EventStore**: Event metadata are stored as json objects in MongoDB now and you cacn query by metadata.
-* **Content**: Updated to state can be scheduled, e.g. to publish them.
+* **Contents**: Updated to state can be scheduled, e.g. to publish them.
 
 > This releases will run a migration, which might take a while and also effects the events. We recommend to make a backup first.
 
@@ -405,12 +956,12 @@ Various small bugfixes for UI and API.
 
 ### Features
 
-* **Content**: Slugify function for custom scripts.
+* **Contents**: Slugify function for custom scripts.
 
 ### Bugfixes
 
 * **Migration**: Assets and schemas were not removed before recreation.
-* **Content**: OData queries only worked for data fields.
+* **Contents**: OData queries only worked for data fields.
 * **Assets**: OData queries did not work at all and included too many fields (e.g. AppId, Id).
 
 ## v1.1.4 - 2018-02-03

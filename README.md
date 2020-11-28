@@ -1,6 +1,6 @@
 ![Squidex Logo](https://raw.githubusercontent.com/Squidex/squidex/master/media/logo-wide.png "Squidex")
 
-# What is Squidex??
+# What is Squidex?
 
 Squidex is an open source headless CMS and content management hub. In contrast to a traditional CMS Squidex provides a rich API with OData filter and Swagger definitions. It is up to you to build your UI on top of it. It can be website, a native app or just another server. We build it with ASP.NET Core and CQRS and is tested for Windows and Linux on modern browsers.
 
@@ -16,7 +16,7 @@ Please join our community forum: https://support.squidex.io
 
 ## Status
 
-Current Version 3.0.0. Roadmap: https://trello.com/b/KakM4F3S/squidex-roadmap
+Current Version ![GitHub release](https://img.shields.io/github/release/squidex/squidex) Roadmap: https://trello.com/b/KakM4F3S/squidex-roadmap
 
 ## Prerequisites
 
@@ -39,6 +39,7 @@ Current Version 3.0.0. Roadmap: https://trello.com/b/KakM4F3S/squidex-roadmap
 * [guohai](https://github.com/seamys): FTP asset store support, Email rule support, custom editors and bug fixes.
 * [pushrbx](https://pushrbx.net/): Azure Store support.
 * [razims](https://github.com/razims): GridFS support.
+* [sauravvijay](https://github.com/sauravvijay): Kafka Rule action.
 
 ## Contributing
 
@@ -47,7 +48,3 @@ Please create issues to report bugs, suggest new functionalities, ask questions 
 ## Cloud Version
 
 Although Squidex is free it is also available as a Saas version on [https://cloud.squidex.io](https://cloud.squidex.io).
-
-## License
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSquidex%2Fsquidex.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FSquidex%2Fsquidex?ref=badge_large)
